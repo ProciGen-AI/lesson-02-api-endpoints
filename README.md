@@ -40,6 +40,8 @@ By the end of this lesson you should be able to answer:
 
 ## How to run
 
+> **On Windows?** Run every lab command from **Git Bash**, not PowerShell or cmd — they can't source a `.sh` file. Easiest setup: open this project in VS Code and set the integrated terminal to Git Bash (`Ctrl+Shift+P` → *Terminal: Select Default Profile* → *Git Bash*), then use that terminal for everything below. No Git Bash? Install [Git for Windows](https://git-scm.com/download/win), or use [WSL](https://learn.microsoft.com/windows/wsl/install) (which behaves like native Linux). If you start in PowerShell by mistake, run `.\setup.ps1` and it'll bounce you to Git Bash. macOS/Linux: ignore this — the commands work as-is.
+
 Start with **`code/00-aws-setup.md`**. It ends with sourcing `setup.sh` to confirm Bedrock works end-to-end:
 
 ```bash

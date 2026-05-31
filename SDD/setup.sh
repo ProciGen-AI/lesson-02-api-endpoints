@@ -16,6 +16,13 @@
 #   script normally, the venv dies when the script exits and your terminal is
 #   not actually activated.
 #
+# WINDOWS
+#   Run this from Git Bash (the bash that ships with Git for Windows) — NOT
+#   PowerShell or cmd, which cannot source a .sh file. Easiest path: open the
+#   project in VS Code and set the integrated terminal to Git Bash. There is a
+#   setup.ps1 next to this file that finds Git Bash and points you there if you
+#   start from PowerShell. WSL also works — it behaves like native Linux.
+#
 # WHAT THIS DOES (in order; the Bedrock invoke is always the final step)
 #   1. .env       — ensure a .env exists at the resolved "env root" (copy
 #                   from .env.example if missing). The env root is the first
@@ -42,6 +49,18 @@
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _LAB_NAME="$(basename "$(dirname "${_SCRIPT_DIR}")")"
+
+# Detect the platform. This script is bash-only: macOS/Linux run it directly,
+# WSL behaves like Linux, and on native Windows the only shell that can run it
+# is Git Bash (which reports MINGW/MSYS). PowerShell and cmd cannot source a
+# .sh file at all — a student who lands there should follow the Windows note in
+# the lesson README (run from Git Bash, e.g. via VS Code's integrated terminal).
+case "$(uname -s 2>/dev/null)" in
+  Linux*)               _OS="linux" ;;
+  Darwin*)              _OS="macos" ;;
+  MINGW*|MSYS*|CYGWIN*) _OS="windows" ;;
+  *)                    _OS="unknown" ;;
+esac
 
 # Resolve the "env root" — where the shared .env lives. The same .env is
 # reused across every lab in the course, so we want it ABOVE the lab/lesson,
@@ -70,6 +89,7 @@ fi
 
 echo "→ Lab:      ${_LAB_NAME}"
 echo "→ Env root: ${_REPO_ROOT}"
+[ "${_OS}" = "windows" ] && echo "→ Shell:    Git Bash on Windows (correct — not PowerShell/cmd)"
 
 # --- 1. .env ----------------------------------------------------------------
 if [ ! -f "${_REPO_ROOT}/.env" ]; then
@@ -105,29 +125,53 @@ if [ ! -f "${_REPO_ROOT}/.env" ]; then
 fi
 
 # --- 2. venv ----------------------------------------------------------------
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "✗ python3 is not on your PATH."
+# Resolve a Python launcher. macOS/Linux/WSL expose `python3`; native Windows
+# (Git Bash) typically only has `python` or the `py` launcher, not `python3`.
+_PYTHON=""
+for _cand in python3 python py; do
+  if command -v "${_cand}" >/dev/null 2>&1; then
+    _PYTHON="${_cand}"
+    break
+  fi
+done
+if [ -z "${_PYTHON}" ]; then
+  echo "✗ No Python interpreter found on your PATH (looked for python3, python, py)."
   echo "  ACTION REQUIRED: install Python 3.11+ before continuing."
   echo "    Ubuntu/Debian/WSL:  sudo apt update && sudo apt install python3 python3-venv"
   echo "    macOS (Homebrew):   brew install python@3.11"
+  echo "    Windows:            https://www.python.org/downloads/windows/ (tick 'Add python.exe to PATH')"
   return 1
 fi
 
 if [ ! -d "${_REPO_ROOT}/.venv" ]; then
   echo "→ Creating shared venv at ${_REPO_ROOT}/.venv"
-  if ! python3 -m venv "${_REPO_ROOT}/.venv" 2>/tmp/venv-create.err; then
+  if ! "${_PYTHON}" -m venv "${_REPO_ROOT}/.venv" 2>/tmp/venv-create.err; then
     echo "✗ Failed to create the virtualenv. Error:"
     sed 's/^/    /' /tmp/venv-create.err
     echo "  ACTION REQUIRED: the most common cause on Linux/WSL is a missing"
     echo "  venv module. Run:"
     echo "    sudo apt update && sudo apt install python3-venv"
+    echo "  (On Windows this is rare — reinstall Python from python.org if it persists.)"
     echo "  Then re-source this script."
     return 1
   fi
 fi
 
-# shellcheck disable=SC1091
-source "${_REPO_ROOT}/.venv/bin/activate"
+# The venv's activate script lives under bin/ on macOS/Linux but Scripts/ on
+# Windows. Git Bash sources the same bash `activate` script — it just sits in
+# Scripts/. Pick whichever exists.
+if [ -f "${_REPO_ROOT}/.venv/bin/activate" ]; then
+  _ACTIVATE="${_REPO_ROOT}/.venv/bin/activate"
+elif [ -f "${_REPO_ROOT}/.venv/Scripts/activate" ]; then
+  _ACTIVATE="${_REPO_ROOT}/.venv/Scripts/activate"
+else
+  echo "✗ Could not find the venv activate script under .venv/bin or .venv/Scripts."
+  echo "  ACTION REQUIRED: recreate the venv:"
+  echo "    rm -rf ${_REPO_ROOT}/.venv && source ${BASH_SOURCE[0]}"
+  return 1
+fi
+# shellcheck disable=SC1090
+source "${_ACTIVATE}"
 echo "✓ Virtualenv active: ${VIRTUAL_ENV}"
 
 # --- 3. requirements --------------------------------------------------------
@@ -151,7 +195,14 @@ fi
 # Inline Python so the lab's setup.sh has no external Python helper to ship.
 # Each failure mode below maps to a concrete next action for the student.
 echo "→ Calling Bedrock to confirm end-to-end connectivity..."
-export LAB_SETUP_ENV_ROOT="${_REPO_ROOT}"
+# The venv's python is a native Windows exe under Git Bash, so it can't read an
+# MSYS-style path like /c/Users/... Convert to a Windows path (C:\Users\...)
+# before handing it to Python, so its canonical .env check resolves cleanly.
+_ENV_ROOT_FOR_PY="${_REPO_ROOT}"
+if [ "${_OS}" = "windows" ] && command -v cygpath >/dev/null 2>&1; then
+  _ENV_ROOT_FOR_PY="$(cygpath -w "${_REPO_ROOT}")"
+fi
+export LAB_SETUP_ENV_ROOT="${_ENV_ROOT_FOR_PY}"
 python - <<'PYCHECK'
 import os
 import sys

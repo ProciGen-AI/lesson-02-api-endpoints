@@ -48,6 +48,8 @@ Never use root account credentials for application access. Create a dedicated IA
 
 The setup script handles `.env` for you. You'll run it twice: once to seed the file, and again — after you fill in your keys and confirm the model ID — to actually verify Bedrock works.
 
+> **On Windows?** Run `setup.sh` (and every later command) from **Git Bash**, not PowerShell or cmd — they can't source a `.sh` file. Easiest: open the project in VS Code and set the integrated terminal to Git Bash (`Ctrl+Shift+P` → *Terminal: Select Default Profile* → *Git Bash*). No Git Bash? Install [Git for Windows](https://git-scm.com/download/win), or use [WSL](https://learn.microsoft.com/windows/wsl/install) (behaves like native Linux). Started in PowerShell by mistake? Run `.\setup.ps1` from the lab folder and it'll point you to Git Bash. macOS/Linux: nothing special — the commands below work as-is.
+
 ### 4a. First run: seed `.env`
 
 From the repo root:
