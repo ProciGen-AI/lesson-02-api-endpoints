@@ -1,0 +1,11 @@
+<!-- Rename this file to CLAUDE.md to activate it, then build from PROMPT.md. -->
+
+# CLAUDE.md — conventions for this rebuild
+
+- Call the model with boto3 Bedrock Converse.
+- Model ID + region come from env vars (never hard-coded).
+- Load .env with `load_dotenv(find_dotenv())`.
+- Keep the Bedrock call in one function so a provider swap is easy.
+- Comment only the non-obvious AI/SDK bits — skip the obvious.
+- Validate the model's output before trusting it.
+- Keep it simple: the shortest code that works.
