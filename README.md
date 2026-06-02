@@ -1,8 +1,10 @@
 # Lesson 2 — API Endpoints
 
-This lesson is about **what an LLM API endpoint actually is, what knobs it exposes, and what you put in front of the model**. It's one lab of nine small exercises that build on each other — all targeting the same call-summary task, so you can diff between exercises and see exactly what each new concept adds.
+This lesson is about **what an LLM API endpoint actually is, what knobs it exposes, and what you put in front of the model**. Six small exercises that build on each other — mostly on the same call-summary task, so you can diff between exercises and see exactly what each new concept adds.
 
-Everything lives under [`code/`](code/): a one-time setup walkthrough (`00-aws-setup.md`), then eight runnable exercises.
+This is the **foundations** half: *calling* the model and its knobs. Getting *machine-reliable structured data* back out (tool-forcing, schema design, validation) and engineering richer context is the focus of **Lesson 3 — API Endpoints, Advanced**, which builds directly on this one.
+
+Everything lives under [`code/`](code/): a one-time setup walkthrough (`00-aws-setup.md`), then six runnable exercises.
 
 ## The exercises
 
@@ -13,12 +15,10 @@ Everything lives under [`code/`](code/): a one-time setup walkthrough (`00-aws-s
 | 02 | `02-basic-call.py` | The same idea via `boto3` Converse against Bedrock. Diff against 01 to see what an SDK gives you (URL, auth, retries). |
 | 03 | `03-summarize.py` | A realistic prompt: `system` role, `user` role, `inferenceConfig` (maxTokens, temperature). Introduces the call-summary use case used throughout the lab. |
 | 04 | `04-streaming.py` | Same prompt as 03, now via `converse_stream`. Tokens print as they arrive; the response is an iterator of typed events. Same call, different delivery. |
-| 05 | `05-structured-output.py` | Force the model to emit JSON matching a schema via tool-forced output. Tiny inline schema (4 flat fields) so the mechanic is the whole lesson. |
-| 06 | `06-rich-schema.py` | Same mechanic as 05, but the schema graduates to a production shape: nested objects, arrays of objects, enums, nullable fields. Teaches schema design. |
-| 07 | `07-validate-and-retry.py` | Productionize 06: validate the model's output with `jsonschema`, and wrap the call with `tenacity` to retry on transient AWS errors or validation failures. |
-| 08 | `08-context-enrichment.py` | Enrich the prompt with **CRM context**. A static system prompt (cache-friendly) plus a dynamic, per-customer user prompt built in `prompts.py`, producing an extended schema whose new fields (churn risk, personalized next actions, cross-sell) only fill well *because* of the context. |
+| 05 | `05-reasoning.py` | Turn on **extended thinking**: the same `converse_stream` call as 04, plus a `thinking` budget. The model streams its (summarized) reasoning first, then the answer. Reasoning is off by default — this exercise is the knob (and shows `temperature` must be 1.0/omitted with thinking). |
+| 06 | `06-prompt-template.py` | Prompts are **code**: an interactive tool that builds the prompt from three menus — **focus**, **format** (customer email / manager email / CRM note), **length**. Constraining the request to fixed choices (vs. a free-text box) makes the output predictable — the input-side cousin of structured output. |
 
-The arc: 01–03 build the basic call. 04 is a quick "delivery mode" detour to see streaming. 05–07 dive into structured output as a three-step build (mechanic → realistic schema → production hardening). 08 shifts the focus from *the call* to *what you feed it* — context engineering.
+The arc: 01–03 build the basic call. 04 (streaming) and 05 (reasoning) are quick "behavior knob" detours on that same call. 06 makes the prompt itself the lesson — a static prefix plus a builder that assembles the request from constrained menu choices (the input-side cousin of structured output), the "retrieve → assemble → render" seam Lesson 3 takes further with live CRM context.
 
 ## Learning objectives
 
@@ -28,9 +28,10 @@ By the end of this lesson you should be able to answer:
 - What does an SDK like `boto3` hide compared to that raw HTTP call?
 - What does a "real" prompt look like — `system` role, `user` role, `maxTokens`, `temperature`?
 - How do you stream tokens as they arrive?
-- How do you force a model to return JSON matching a schema, how do you design that schema, and how do you validate the result?
-- Why split a prompt into a static system prefix and a dynamic user payload — and what does that buy you (caching, separation of concerns)?
-- How does enriching the prompt with external context (a CRM record) change the model's output, and where does that context-assembly logic belong in your code?
+- What is extended thinking, why is it off by default, and what constraint does it put on `temperature`?
+- Why build prompts from a static prefix + a dynamic builder — and why constrain inputs to fixed menu choices rather than a free-text request?
+
+> Forcing JSON output, schema design, validation/retry, and context enrichment build on these and live in **Lesson 3 — API Endpoints, Advanced**.
 
 ## Prerequisites
 
@@ -42,27 +43,40 @@ By the end of this lesson you should be able to answer:
 
 > **On Windows?** Run every lab command from **Git Bash**, not PowerShell or cmd — they can't source a `.sh` file. Easiest setup: open this project in VS Code and set the integrated terminal to Git Bash (`Ctrl+Shift+P` → *Terminal: Select Default Profile* → *Git Bash*), then use that terminal for everything below. No Git Bash? Install [Git for Windows](https://git-scm.com/download/win), or use [WSL](https://learn.microsoft.com/windows/wsl/install) (which behaves like native Linux). If you start in PowerShell by mistake, run `.\setup.ps1` and it'll bounce you to Git Bash. macOS/Linux: ignore this — the commands work as-is.
 
-Start with **`code/00-aws-setup.md`**. It ends with sourcing `setup.sh` to confirm Bedrock works end-to-end:
+Start with **`code/00-aws-setup.md`**. It walks you into the `code/` folder and ends with sourcing `setup.sh` to confirm Bedrock works end-to-end:
 
 ```bash
-source course/Lesson-02-API-Endpoints/code/setup.sh
+cd Lesson-02-API-Endpoints/code
+source setup.sh
 ```
 
-After setup passes, run each exercise:
+That leaves you in `code/` — run each exercise from there:
 
 ```bash
-python course/Lesson-02-API-Endpoints/code/01-http-raw.py
-python course/Lesson-02-API-Endpoints/code/02-basic-call.py
-python course/Lesson-02-API-Endpoints/code/03-summarize.py
-python course/Lesson-02-API-Endpoints/code/04-streaming.py
-python course/Lesson-02-API-Endpoints/code/05-structured-output.py
-python course/Lesson-02-API-Endpoints/code/06-rich-schema.py
-python course/Lesson-02-API-Endpoints/code/07-validate-and-retry.py
-python course/Lesson-02-API-Endpoints/code/08-context-enrichment.py
+python 01-http-raw.py
+python 02-basic-call.py
+python 03-summarize.py
+python 04-streaming.py
+python 05-reasoning.py
+python 06-prompt-template.py
 ```
 
 Prefer exploring by chatting with a coding agent rather than reading every line? [`code/PROMPTS.md`](code/PROMPTS.md) has sample explore-and-modify prompts for each exercise.
 
+## Build it yourself (spec-driven rebuild)
+
+Once you've studied the lab above, practice *producing* the culminating exercise from a spec rather than reading it. The build exercise ships as a **separate repo** so your coding agent starts from a clean slate — no answer key in the tree:
+
+```bash
+git clone https://github.com/ProciGen-AI/lesson-02-api-endpoints-sdd.git
+```
+
+Open it, follow its `README.md`, and rebuild `06-prompt-template.py` from `PROMPT.md` — then score yourself with the bundled `validate-lab` skill.
+
 ## Homework
 
-[`homework/README.md`](homework/README.md) has three optional extensions: multi-turn conversation, prompt caching, and extended thinking. Each one builds on a specific exercise from this lab.
+[`homework/README.md`](homework/README.md) has three optional extensions: multi-turn conversation, prompt caching, and letting the model drive the menu (reasoning → autonomy). Each one builds on a specific exercise from this lab.
+
+## Next
+
+**Lesson 3 — API Endpoints, Advanced** picks up here: tool-forced structured output, production schema design, validation + retry, and context enrichment.

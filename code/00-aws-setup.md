@@ -1,6 +1,6 @@
 # Exercise 00 — Set up AWS Bedrock
 
-This is a one-time setup that prepares your AWS account to run every Bedrock-based exercise in this course (02–08). There is no Python code here — it's a walkthrough of the AWS console plus a smoke test at the end.
+This is a one-time setup that prepares your AWS account to run every Bedrock-based exercise in this course (02–06). There is no Python code here — it's a walkthrough of the AWS console plus a smoke test at the end.
 
 Exercise 01 (Gemini via raw HTTP) does **not** require AWS — you can do that one with just a Google AI Studio key (Step 5). Everything from 02 onward needs the AWS setup below.
 
@@ -52,13 +52,12 @@ The setup script handles `.env` for you. You'll run it twice: once to seed the f
 
 ### 4a. First run: seed `.env`
 
-From the repo root:
+Move into the lab's `code/` folder and source the setup script from there. You'll stay in `code/` for the rest of the lab — it's where you run every exercise — so `cd` in now:
 
 ```bash
-source course/Lesson-02-API-Endpoints/code/setup.sh
+cd Lesson-02-API-Endpoints/code
+source setup.sh
 ```
-
-(If you're working from an isolated copy of just this lesson, the path is `Lesson-02-API-Endpoints/code/setup.sh`.)
 
 On the first run (no `.env` exists yet) the script copies `.env.example` into place and stops with an "ACTION REQUIRED" message. That's expected — you haven't filled in your keys yet.
 
@@ -90,10 +89,10 @@ To pick a current ID:
 
 ### 4d. Second run: verify Bedrock works
 
-Source the script again:
+Source the script again (you're already in `code/`):
 
 ```bash
-source course/Lesson-02-API-Endpoints/code/setup.sh
+source setup.sh
 ```
 
 This time it runs the full check. On success the last lines are:
@@ -156,7 +155,7 @@ If a screenshot accidentally exposes a key, **rotate it immediately** (IAM → S
 
 ```
 I'm at Step 4d (verifying with setup.sh). I ran
-`source course/Lesson-02-API-Endpoints/code/setup.sh` and got:
+`source setup.sh` and got:
 
   ✗ Bedrock returned [AccessDeniedException]: User: arn:aws:iam::123456789012:user/ai-course-bedrock
     is not authorized to perform: bedrock:InvokeModel
