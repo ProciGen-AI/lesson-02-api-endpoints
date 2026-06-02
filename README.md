@@ -66,13 +66,9 @@ Prefer exploring by chatting with a coding agent rather than reading every line?
 
 ## Build it yourself (spec-driven rebuild)
 
-Once you've studied the lab above, practice *producing* the culminating exercise from a spec rather than reading it. The build exercise ships as a **separate repo** so your coding agent starts from a clean slate — no answer key in the tree:
+Once you've studied the lab above, practice *producing* the culminating exercise from a spec rather than reading it — see **[`SDD/`](SDD/)**. You build in a separate **clean** repo (so your coding agent gets no answer key and no rubric to game), driven by [`SDD/PROMPT.md`](SDD/PROMPT.md), then score yourself with the `validate-lab` skill from `SDD/`.
 
-```bash
-git clone https://github.com/ProciGen-AI/lesson-02-api-endpoints-sdd.git
-```
-
-Open it, follow its `README.md`, and rebuild `06-prompt-template.py` from `PROMPT.md` — then score yourself with the bundled `validate-lab` skill.
+Start here: **[`SDD/README.md`](SDD/README.md)**.
 
 ## Homework
 

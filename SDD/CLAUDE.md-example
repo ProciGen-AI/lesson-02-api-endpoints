@@ -1,0 +1,12 @@
+<!-- Rename this file to CLAUDE.md to activate it, then build the script from the lesson's PROMPT.md (in the lesson repo's SDD/ folder). -->
+
+# CLAUDE.md — conventions for this rebuild
+
+- Call the model with boto3 Bedrock Converse.
+- Model ID + region come from env vars (never hard-coded).
+- Load .env with `load_dotenv(find_dotenv())`.
+- Keep the Bedrock call in one function so a provider swap is easy.
+- Build the prompt as code: a static system prompt + a builder function for the dynamic user prompt.
+- Put any data/variable lookups inside the builder; keep rendering pure so it's easy to test.
+- Comment only the non-obvious AI/SDK bits — skip the obvious.
+- Keep it simple: the shortest code that works.
