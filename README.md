@@ -46,7 +46,8 @@ By the end of this lesson you should be able to answer:
 Start with **`code/00-aws-setup.md`**. It walks you into the `code/` folder and ends with sourcing `setup.sh` to confirm Bedrock works end-to-end:
 
 ```bash
-cd Lesson-02-API-Endpoints/code
+git clone https://github.com/ProciGen-AI/lesson-02-api-endpoints.git
+cd lesson-02-api-endpoints/code
 source setup.sh
 ```
 

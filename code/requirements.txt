@@ -1,7 +1,6 @@
-# Standalone dependency list for Lesson 2.
-# A student who only cares about this lab can:
-#   pip install -r course/Lesson-02-API-Endpoints/code/requirements.txt
-# and have everything they need.
+# Standalone dependency list for Lesson 2 — everything this lab needs.
+# setup.sh installs these for you; to do it by hand, run from this folder:
+#   pip install -r requirements.txt
 
 # AWS SDK — used by every Bedrock exercise (02–08).
 boto3

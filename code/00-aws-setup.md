@@ -55,7 +55,7 @@ The setup script handles `.env` for you. You'll run it twice: once to seed the f
 Move into the lab's `code/` folder and source the setup script from there. You'll stay in `code/` for the rest of the lab — it's where you run every exercise — so `cd` in now:
 
 ```bash
-cd Lesson-02-API-Endpoints/code
+cd code        # from the root of the cloned repo
 source setup.sh
 ```
 

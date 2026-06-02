@@ -4,12 +4,9 @@
 # setup.sh and have everything they need.
 #
 # USAGE
-#   From wherever your lesson folder lives:
-#     source <lesson-folder>/lab/setup.sh
-#   For example, from the repo root in the full course tree:
-#     source course/Lesson-XX-Name/lab/setup.sh
-#   Or from the parent of an isolated lesson copy:
-#     source Lesson-XX-Name/lab/setup.sh
+#   From the folder this file lives in (the lab's `code/` folder, or the SDD
+#   build repo's root), source it — don't execute it:
+#     source setup.sh
 #
 #   IMPORTANT: use `source` (or `.`), NOT `./setup.sh`. A venv activation only
 #   persists in the shell that ran the activate command — if you execute the
