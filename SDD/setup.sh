@@ -45,7 +45,26 @@
 }
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_LAB_NAME="$(basename "$(dirname "${_SCRIPT_DIR}")")"
+# The git root of wherever setup.sh lives: the clone root for a published
+# standalone lab, or empty in the instructor's (non-git) course tree. We use it
+# to keep the venv/.env INSIDE the repo a student cloned, and to label the lab.
+_GIT_ROOT=""
+_d="${_SCRIPT_DIR}"
+for _ in 1 2; do   # setup.sh sits AT the repo root (build repo) or one level in (code/, SDD/)
+  if [ -e "${_d}/.git" ]; then _GIT_ROOT="${_d}"; break; fi
+  _next="$(dirname "${_d}")"
+  [ "${_next}" = "${_d}" ] && break
+  _d="${_next}"
+done
+
+# Lab label: when setup.sh sits AT the repo root (the published -sdd build repo)
+# the lab name is that folder; when it's in a code/ or SDD/ subfolder, it's the
+# folder above.
+if [ -n "${_GIT_ROOT}" ] && [ "${_SCRIPT_DIR}" = "${_GIT_ROOT}" ]; then
+  _LAB_NAME="$(basename "${_SCRIPT_DIR}")"
+else
+  _LAB_NAME="$(basename "$(dirname "${_SCRIPT_DIR}")")"
+fi
 
 # Detect the platform. This script is bash-only: macOS/Linux run it directly,
 # WSL behaves like Linux, and on native Windows the only shell that can run it
@@ -59,29 +78,26 @@ case "$(uname -s 2>/dev/null)" in
   *)                    _OS="unknown" ;;
 esac
 
-# Resolve the "env root" — where the shared .env lives. The same .env is
-# reused across every lab in the course, so we want it ABOVE the lab/lesson,
-# not inside one of them.
+# Resolve the "env root" — where .env and the venv live.
 #
-# Strategy: anchor on $PWD (the dir the student/instructor sourced this
-# script from). That respects their explicit choice of working directory.
-# Then walk up to 3 levels in case they sourced from a subdirectory and an
-# existing .env lives higher up (e.g. instructor in the full course repo,
-# sourcing from inside lab/).
+#  - Published standalone lab (a git clone): anchor at the clone root, so the
+#    venv/.env stay INSIDE the repo. This is the key fix — never walk up and out
+#    of the clone (an unrelated .env in a parent dir must not hijack the setup).
+#  - Instructor's course tree (not a git repo): keep the old behaviour — walk up
+#    from $PWD to find the single shared .env, so one venv serves every lab.
 _PWD="$(pwd)"
-_REPO_ROOT=""
-_d="${_PWD}"
-for _ in 1 2 3 4; do
-  if [ -f "${_d}/.env" ]; then
-    _REPO_ROOT="${_d}"
-    break
-  fi
-  _next="$(dirname "${_d}")"
-  [ "${_next}" = "${_d}" ] && break   # hit filesystem root
-  _d="${_next}"
-done
-if [ -z "${_REPO_ROOT}" ]; then
-  _REPO_ROOT="${_PWD}"
+if [ -n "${_GIT_ROOT}" ]; then
+  _REPO_ROOT="${_GIT_ROOT}"
+else
+  _REPO_ROOT=""
+  _d="${_PWD}"
+  for _ in 1 2 3 4; do
+    if [ -f "${_d}/.env" ]; then _REPO_ROOT="${_d}"; break; fi
+    _next="$(dirname "${_d}")"
+    [ "${_next}" = "${_d}" ] && break   # hit filesystem root
+    _d="${_next}"
+  done
+  [ -z "${_REPO_ROOT}" ] && _REPO_ROOT="${_PWD}"
 fi
 
 echo "→ Lab:      ${_LAB_NAME}"
