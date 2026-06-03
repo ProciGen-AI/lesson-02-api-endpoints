@@ -21,12 +21,10 @@ whatever they want.
 
 Build a single script that:
 
-- offers the user a short **menu for each of a few request dimensions** (e.g.
-  focus, output format, length), each option shown with a one-line example
+- offers the user a short **menu for each of a few request dimensions**, each
+  option shown with a one-line example
 - reads the user's pick for each menu and **validates it** (a numbered menu, not
   free text — that constraint is the point)
-- assembles the user prompt with a **builder function** from the chosen options
-  plus the transcript, keeping a **static** system prompt separate
 - calls the model and prints the deliverable
 
 Inputs:
