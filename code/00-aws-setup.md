@@ -73,19 +73,19 @@ AWS_REGION=us-east-1                # broadest Bedrock model availability
 
 ### 4c. Confirm — or update — the model ID
 
-`.env.example` ships with `BEDROCK_MODEL_ID` set to **Claude Haiku 4.5**, which is the course default. For most students this is fine and you can skip to 4d. You need to touch this line only if:
+`.env.example` ships with `BEDROCK_MODEL_ID` set to **Amazon Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`), which is the course default. For most students this is fine and you can skip to 4d. You need to touch this line only if:
 
-- you want to use a different model (Sonnet/Opus alternatives are in the file as commented-out lines), **or**
-- Anthropic has shipped a newer Claude version since this lab was written and you want the latest.
+- you want to use a different model, **or**
+- Amazon has shipped a newer Nova version since this lab was written and you want the latest.
 
 To pick a current ID:
 
 1. Open the Bedrock console: https://console.aws.amazon.com/bedrock/
 2. Region selector (top-right) → match the value of `AWS_REGION` in your `.env`.
-3. Left sidebar under **Discover** → **Model catalog** → filter by provider **Anthropic**.
-4. Click into the model you want → copy its **Model ID** from the detail page → paste it as `BEDROCK_MODEL_ID` in `.env`. Add the `us.` prefix if the catalog ID doesn't already have it — that's the inference-profile (cross-region routing) prefix required for Claude 4.x.
+3. Left sidebar under **Discover** → **Model catalog** → filter by provider **Amazon**.
+4. Click into the model you want → copy its **Model ID** from the detail page → paste it as `BEDROCK_MODEL_ID` in `.env`. Use the **cross-region inference-profile** ID (the `us.` one — e.g. `us.amazon.nova-2-lite-v1:0`), not the bare `amazon...` ID: Nova 2 Lite can't be called in-region on-demand in us-east-1, so the profile prefix is required.
 
-> **Anthropic first-time use-case form.** On a brand-new account, the first invocation of an Anthropic model may be gated behind a short use-case form (intended use, industry, expected volume). If 4d below fails with an `AccessDeniedException` that mentions a use-case requirement, return to the model's page in the catalog, fill in the form, wait for approval (usually a few minutes), then re-run the script.
+> **Enable model access.** Before the first call, the model must be enabled for your account under **Model access** in the Bedrock console. Amazon's own models (Nova) are first-party and usually don't require the use-case form some third-party models do, but you may still need to toggle access on. If 4d below fails with an `AccessDeniedException` about model access, open **Model access**, enable **Amazon Nova 2 Lite**, wait a moment, then re-run the script.
 
 ### 4d. Second run: verify Bedrock works
 
@@ -106,9 +106,9 @@ This time it runs the full check. On success the last lines are:
 
 The setup script prints a concrete action for every failure mode. The most common ones:
 
-- **`AccessDeniedException`** — credentials are valid but the call was refused. Two common causes: (a) the IAM policy doesn't allow `bedrock:InvokeModel` (check the user's attached policies in IAM), or (b) for Anthropic models on a new account, you haven't yet submitted the use-case form — re-read the note in 4c.
+- **`AccessDeniedException`** — credentials are valid but the call was refused. Two common causes: (a) the IAM policy doesn't allow `bedrock:InvokeModel` (check the user's attached policies in IAM), or (b) model access for Nova 2 Lite isn't enabled for your account — re-read the **Model access** note in 4c.
 - **`UnrecognizedClientException` / `InvalidSignatureException`** — your `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` is wrong. Re-check the values from Step 3.
-- **`ResourceNotFoundException`** — the `BEDROCK_MODEL_ID` value isn't valid in your region. The most common cause is forgetting the `us.` inference-profile prefix on newer Claude models. Re-do 4c.
+- **`ResourceNotFoundException`** — the `BEDROCK_MODEL_ID` value isn't valid in your region. The most common cause is forgetting the `us.` inference-profile prefix (Nova 2 Lite needs it — the bare `amazon...` ID isn't on-demand callable in-region). Re-do 4c.
 - **`EndpointConnectionError`** — `AWS_REGION` isn't a Bedrock-supported region. Try `us-east-1` or `us-west-2`.
 
 If the error you're seeing isn't in that list — or the suggested action doesn't fix it — see [Getting help when setup fails](#getting-help-when-setup-fails) below.
@@ -161,14 +161,14 @@ I'm at Step 4d (verifying with setup.sh). I ran
     is not authorized to perform: bedrock:InvokeModel
 
 My .env has AWS_REGION=us-east-1 and
-BEDROCK_MODEL_ID=us.anthropic.claude-haiku-4-5-20251001-v1:0 (keys redacted).
+BEDROCK_MODEL_ID=us.amazon.nova-2-lite-v1:0 (keys redacted).
 The IAM user has AmazonBedrockFullAccess. The account is brand new and I
-have not yet submitted the Anthropic use-case form mentioned in Step 4c.
+have not yet enabled model access for Nova 2 Lite (Step 4c).
 
 What's the most likely cause?
 ```
 
-That lets Claude rule out 80% of failure modes immediately and zero in on the real one (here, the use-case form). Compare it to "it doesn't work" — which forces three follow-up questions before any help is possible.
+That lets Claude rule out 80% of failure modes immediately and zero in on the real one (here, model access). Compare it to "it doesn't work" — which forces three follow-up questions before any help is possible.
 
 ### When you don't know what to ask
 

@@ -17,7 +17,7 @@ These prompts let you explore and modify the lab using a coding agent. Open this
   Surfaces that streaming is the *same call shape* with a different response delivery — not a different API.
 
 - **"Compare `04-streaming.py` and `05-reasoning.py` line by line. Which single block turns reasoning on, and where in the event stream do the `reasoningContent` deltas appear versus the `text` deltas?"**
-  Isolates the one knob (the `thinking` block in `additionalModelRequestFields`) and the new stream shape — the model's reasoning streams *before* the answer.
+  Isolates the one knob (the `reasoningConfig` block in `additionalModelRequestFields`) and the new stream shape — the `reasoningContent` block streams *before* the answer (on Nova its text is redacted to `[REDACTED]`).
 
 - **"In `06-prompt-template.py`, the request is driven by three menus (focus / format / length), not a free-text box. Trace how a menu choice becomes part of the prompt: which dict holds the options, where the chosen fragment is spliced in (`build_request_prompt`), and what stays in the static `SYSTEM_PROMPT`. Why does constraining the input to menus make the output more predictable than 'type what you want'?"**
   Surfaces both ideas at once: the static-prefix vs. dynamic-payload split, and "constrain the input → predictable output" — the input-side cousin of Lesson 3's structured output.
@@ -33,11 +33,11 @@ These prompts let you explore and modify the lab using a coding agent. Open this
 - **"In `04-streaming.py`, count tokens-per-second as they arrive (use `time.monotonic()` around the loop). Compare against `03-summarize.py`'s wall-clock time for the same prompt. Where does the latency win come from?"**
   Makes the "why stream" case quantitative.
 
-- **"In `05-reasoning.py`, set `THINKING_BUDGET_TOKENS` to 256, then to 1500, running each. How does the depth of the streamed reasoning change, and does the final answer stay correct? Then delete the `additionalModelRequestFields` block and re-run — what happens to the `--- THINKING ---` section?"**
-  Makes the reasoning budget tangible: more budget → more thinking, and removing the block turns reasoning off (no `reasoningContent` at all).
+- **"In `05-reasoning.py`, set `REASONING_EFFORT` to `'low'`, then `'medium'`, then `'high'`, running each. The reasoning text is redacted, so watch the **token counter** instead — how does the hidden-reasoning count change, and does the final answer stay correct? Then delete the `additionalModelRequestFields` block and re-run — what happens to the reasoning count and the `--- REASONING ---` section?"**
+  Makes reasoning effort tangible through *cost*: higher effort → more (invisible) reasoning tokens; removing the block turns reasoning off (no `reasoningContent`, reasoning tokens → 0).
 
-- **"In `05-reasoning.py`, add `\"temperature\": 0.2` to `inferenceConfig` and run it. Read the error, then explain why extended thinking forbids a custom temperature and what the fix is."**
-  Turns the Bedrock constraint (temperature must be 1.0/omitted with thinking) into a hands-on `ValidationException` rather than a footnote.
+- **"In `05-reasoning.py`, set `REASONING_EFFORT = 'high'` and force `inferenceConfig={'maxTokens': MAX_TOKENS}` (drop the conditional), run it and read the error, then explain why **high** effort forbids `maxTokens`/`temperature`/`topP` and what the fix is."**
+  Turns the Bedrock constraint (high-effort reasoning needs those params unset) into a hands-on `ValidationException` rather than a footnote.
 
 - **"In `06-prompt-template.py`, add a fourth menu — `AUDIENCE` (e.g. 'executive', 'frontline agent', 'legal') — with an instruction fragment per option, wire it through `choose()` and `build_request_prompt()`, and run it. Did the new dimension change the output? How few lines did adding a whole dimension take?"**
   Shows the payoff of options-as-data + one builder: a new request dimension is a small, local change.

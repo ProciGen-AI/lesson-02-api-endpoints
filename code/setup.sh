@@ -115,7 +115,7 @@ if [ ! -f "${_REPO_ROOT}/.env" ]; then
     echo "    AWS_ACCESS_KEY_ID=..."
     echo "    AWS_SECRET_ACCESS_KEY=..."
     echo "    AWS_REGION=us-east-1"
-    echo "    BEDROCK_MODEL_ID=us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    echo "    BEDROCK_MODEL_ID=us.amazon.nova-2-lite-v1:0"
     echo "  Then re-run:  source ${BASH_SOURCE[0]}"
     return 1
   fi
@@ -259,7 +259,7 @@ else:
         sys.exit(1)
 
 region = os.getenv("AWS_REGION", "us-east-1")
-model_id = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
+model_id = os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-2-lite-v1:0")
 print(f"  region={region}  model={model_id}")
 
 try:
@@ -290,9 +290,9 @@ except ClientError as e:
     if code == "AccessDeniedException":
         print("  ACTION REQUIRED: two common causes —", file=sys.stderr)
         print("    (a) the IAM user lacks bedrock:InvokeModel — check its attached policy in IAM;", file=sys.stderr)
-        print(f"    (b) for Anthropic models on a new account, you may need to submit the", file=sys.stderr)
-        print(f"        use-case form. Open {model_id!r} in the Bedrock console (Discover →", file=sys.stderr)
-        print("        Model catalog) and follow any prompt to submit it, then re-source.", file=sys.stderr)
+        print(f"    (b) model access for this model isn't enabled for your account.", file=sys.stderr)
+        print(f"        Open {model_id!r} in the Bedrock console (Discover → Model", file=sys.stderr)
+        print("        catalog → Model access) and enable it, then re-source.", file=sys.stderr)
     elif code == "ResourceNotFoundException":
         print("  ACTION REQUIRED: the model ID is not valid in this region.", file=sys.stderr)
         print(f"  Verify BEDROCK_MODEL_ID in .env matches a model available in {region!r}.", file=sys.stderr)
