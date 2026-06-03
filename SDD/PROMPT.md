@@ -19,18 +19,6 @@ Turn a call summary into a small interactive tool — and build the prompt **as
 code from constrained choices**, not from a free-text box where the user types
 whatever they want.
 
-Build a single script that:
-
-- offers the user a short **menu for each of a few request dimensions**, each
-  option shown with a one-line example
-- reads the user's pick for each menu and **validates it** (a numbered menu, not
-  free text — that constraint is the point)
-- calls the model and prints the deliverable
-
-Inputs:
-
-- `data/call1.txt` — the transcript
-
 Write the script as `06-prompt-template.py` at the root of your build repo (your
 working directory) — that's where you'll run it from.
 
