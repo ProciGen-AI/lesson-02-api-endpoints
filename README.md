@@ -8,15 +8,15 @@ Everything lives under [`code/`](code/): a one-time setup walkthrough (`00-aws-s
 
 ## The exercises
 
-| # | File | What it adds vs. the previous one |
-|---|---|---|
-| 00 | [`00-aws-setup.md`](code/00-aws-setup.md) | One-time setup: create an IAM user, configure `.env`, run the smoke test. No Python. |
-| 01 | `01-http-raw.py` | The minimum: an LLM API is just an HTTP POST. Uses Gemini so we don't have to write SigV4 by hand. |
-| 02 | `02-basic-call.py` | The same idea via `boto3` Converse against Bedrock. Diff against 01 to see what an SDK gives you (URL, auth, retries). |
-| 03 | `03-summarize.py` | A realistic prompt: `system` role, `user` role, `inferenceConfig` (maxTokens, temperature). Introduces the call-summary use case used throughout the lab. |
-| 04 | `04-streaming.py` | Same prompt as 03, now via `converse_stream`. Tokens print as they arrive; the response is an iterator of typed events. Same call, different delivery. |
-| 05 | `05-reasoning.py` | Turn on **extended thinking** with a `reasoningConfig` effort level (`low`/`medium`/`high`) — off by default, this is the knob. The twist: **Nova redacts the reasoning** (`reasoningContent` streams as `[REDACTED]`), so you see *that* it thought and pay for the tokens but can't read them — a real provider-transparency lesson. A token counter shows the cost: a few visible answer tokens vs. a much larger hidden reasoning bill. |
-| 06 | `06-prompt-template.py` | Prompts are **code**: an interactive tool that builds the prompt from three menus — **focus**, **format** (customer email / manager email / CRM note), **length**. Constraining the request to fixed choices (vs. a free-text box) makes the output predictable — the input-side cousin of structured output. |
+Each entry says what it adds over the previous one:
+
+- **00 · [`00-aws-setup.md`](code/00-aws-setup.md)** — One-time setup: create an IAM user, configure `.env`, run the smoke test. No Python.
+- **01 · `01-http-raw.py`** — The minimum: an LLM API is just an HTTP POST. Uses Gemini so we don't have to write SigV4 by hand.
+- **02 · `02-basic-call.py`** — The same idea via `boto3` Converse against Bedrock. Diff against 01 to see what an SDK gives you (URL, auth, retries).
+- **03 · `03-summarize.py`** — A realistic prompt: `system` role, `user` role, `inferenceConfig` (maxTokens, temperature). Introduces the call-summary use case used throughout the lab.
+- **04 · `04-streaming.py`** — Same prompt as 03, now via `converse_stream`. Tokens print as they arrive; the response is an iterator of typed events. Same call, different delivery.
+- **05 · `05-reasoning.py`** — Turn on **extended thinking** with a `reasoningConfig` effort level (`low`/`medium`/`high`) — off by default, this is the knob. The twist: **Nova redacts the reasoning** (`reasoningContent` streams as `[REDACTED]`), so you see *that* it thought and pay for the tokens but can't read them — a real provider-transparency lesson. A token counter shows the cost: a few visible answer tokens vs. a much larger hidden reasoning bill.
+- **06 · `06-prompt-template.py`** — Prompts are **code**: an interactive tool that builds the prompt from three menus — **focus**, **format** (customer email / manager email / CRM note), **length**. Constraining the request to fixed choices (vs. a free-text box) makes the output predictable — the input-side cousin of structured output.
 
 The arc: 01–03 build the basic call. 04 (streaming) and 05 (reasoning) are quick "behavior knob" detours on that same call. 06 makes the prompt itself the lesson — a static prefix plus a builder that assembles the request from constrained menu choices (the input-side cousin of structured output), the "retrieve → assemble → render" seam Lesson 3 takes further with live CRM context.
 

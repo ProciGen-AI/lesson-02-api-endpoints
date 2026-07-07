@@ -27,8 +27,8 @@ response = client.converse(
 # The Converse API hands back more than the answer. Dump the whole response
 # to see the envelope: output.message.content is a LIST of blocks, and for a
 # plain text call that one block is a `text` block. You also get stopReason,
-# token usage, and request metadata. (In 06 we force a tool and this same
-# content slot becomes a `toolUse` block instead — diff the two raw dumps.)
+# token usage, and request metadata. (In Lesson 3 we force a tool and this same
+# content slot becomes a `toolUse` block instead.)
 print("=== RAW CONVERSE RESPONSE ===")
 print(json.dumps(response, indent=2, default=str))
 

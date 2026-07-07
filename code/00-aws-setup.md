@@ -32,7 +32,7 @@ Never use root account credentials for application access. Create a dedicated IA
 4. On **Set permissions**, the wizard defaults to **Add user to group** — switch to **Attach policies directly**. Groups are the production best practice, but for a single course user they only add extra clicks without any real benefit.
 5. Search for `AmazonBedrockFullAccess` and check it.
    - This is broader than you'd use in production, but fine for the course.
-   - The narrowest policy that would work is one granting `bedrock:InvokeModel`, `bedrock:InvokeModelWithResponseStream`, `bedrock:Converse`, and `bedrock:ConverseStream` on `*` (or a specific model ARN).
+   - The narrowest policy that would work is one granting `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` on `*` (or a specific model ARN). Those two actions also authorize the Converse API the labs use — there is no separate `bedrock:Converse` IAM action.
 6. Click **Next**, then **Create user**.
 
 ## Step 3 — Generate access keys
@@ -99,7 +99,7 @@ This time it runs the full check. On success the last lines are:
 
 ```
 ✓ Bedrock OK — model replied: 'ok'
-✓ Lesson-02-API-Endpoints is ready. Run an exercise with:  python <exercise>.py
+✓ lesson-02-api-endpoints is ready. Run an exercise with:  python <exercise>.py
 ```
 
 ### If you see an error
